@@ -1,12 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>我的翻译语料库</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Translation Style Library</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
-    .entry { border-bottom: 1px solid #ddd; padding: 10px 0; }
-    .label { font-weight: bold; color: #555; }
+    body {
+      font-family: system-ui, sans-serif;
+      background-color: #f7f9fb;
+      margin: 0;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #222;
+      margin-bottom: 40px;
+    }
+    .entry {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 600px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .entry div {
+      margin: 5px 0;
+    }
+    .label {
+      font-weight: bold;
+      color: #555;
+    }
+    .tag {
+      display: inline-block;
+      background: #eee;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 13px;
+      margin: 3px 4px 3px 0;
+    }
+    .tag-func { background: #d0eaff; color: #1565c0; }
+    .tag-tone { background: #ffd6d6; color: #c62828; }
+    .tag-scene { background: #e8d4ff; color: #6a1b9a; }
   </style>
 </head>
 <body>
@@ -26,15 +61,22 @@
             <div><span class="label">中文：</span>${entry["中文"]}</div>
             <div><span class="label">英文：</span>${entry["英文表达"]}</div>
             <div><span class="label">版本：</span>${entry["版本"]}</div>
-            <div><span class="label">主功能：</span>${entry["主功能"]}</div>
-            <div><span class="label">语气风格：</span>${entry["语气风格"]}</div>
-            <div><span class="label">使用场景：</span>${entry["使用场景"]}</div>
+            <div><span class="label">主功能：</span>${wrapTags(entry["主功能"], 'tag-func')}</div>
+            <div><span class="label">语气风格：</span>${wrapTags(entry["语气风格"], 'tag-tone')}</div>
+            <div><span class="label">使用场景：</span>${wrapTags(entry["使用场景"], 'tag-scene')}</div>
             <div><span class="label">适用角色：</span>${entry["适用角色"]}</div>
             <div><span class="label">备注：</span>${entry["备注"]}</div>
           `;
           container.appendChild(div);
         });
       });
+
+    function wrapTags(text, className) {
+      if (!text) return '';
+      return text.split(',').map(tag =>
+        `<span class="tag ${className}">${tag.trim()}</span>`
+      ).join(' ');
+    }
   </script>
 </body>
 </html>
