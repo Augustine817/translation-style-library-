@@ -16,7 +16,7 @@
       color: #222;
       margin-bottom: 20px;
     }
-    #search-container {
+    #search-container, #daily-card {
       text-align: center;
       margin-bottom: 30px;
     }
@@ -27,6 +27,16 @@
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
+    }
+    .button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #1565c0;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
     .entry {
       background: white;
@@ -58,9 +68,17 @@
 </head>
 <body>
   <h1>Translation Expression Showcase</h1>
+
+  <div id="daily-card">
+    <h2>每日一句</h2>
+    <div id="randomEntry" class="entry">加载中...</div>
+    <button class="button" onclick="showRandomEntry()">换一句</button>
+  </div>
+
   <div id="search-container">
     <input type="text" id="searchBox" placeholder="输入关键词以搜索表达、标签或角色..." />
   </div>
+
   <div id="content">Loading...</div>
 
   <script>
@@ -71,6 +89,7 @@
       .then(data => {
         allData = data;
         render(data);
+        showRandomEntry();
       });
 
     function render(data) {
@@ -79,18 +98,22 @@
       data.forEach(entry => {
         const div = document.createElement('div');
         div.className = 'entry';
-        div.innerHTML = `
-          <div><span class="label">中文：</span>${entry["中文"]}</div>
-          <div><span class="label">英文：</span>${entry["英文表达"]}</div>
-          <div><span class="label">版本：</span>${entry["版本"]}</div>
-          <div><span class="label">主功能：</span>${wrapTags(entry["主功能"], 'tag-func')}</div>
-          <div><span class="label">语气风格：</span>${wrapTags(entry["语气风格"], 'tag-tone')}</div>
-          <div><span class="label">使用场景：</span>${wrapTags(entry["使用场景"], 'tag-scene')}</div>
-          <div><span class="label">适用角色：</span>${entry["适用角色"]}</div>
-          <div><span class="label">备注：</span>${entry["备注"]}</div>
-        `;
+        div.innerHTML = formatEntry(entry);
         container.appendChild(div);
       });
+    }
+
+    function formatEntry(entry) {
+      return `
+        <div><span class="label">中文：</span>${entry["中文"]}</div>
+        <div><span class="label">英文：</span>${entry["英文表达"]}</div>
+        <div><span class="label">版本：</span>${entry["版本"]}</div>
+        <div><span class="label">主功能：</span>${wrapTags(entry["主功能"], 'tag-func')}</div>
+        <div><span class="label">语气风格：</span>${wrapTags(entry["语气风格"], 'tag-tone')}</div>
+        <div><span class="label">使用场景：</span>${wrapTags(entry["使用场景"], 'tag-scene')}</div>
+        <div><span class="label">适用角色：</span>${entry["适用角色"]}</div>
+        <div><span class="label">备注：</span>${entry["备注"]}</div>
+      `;
     }
 
     function wrapTags(text, className) {
@@ -98,6 +121,13 @@
       return text.split(',').map(tag =>
         `<span class="tag ${className}">${tag.trim()}</span>`
       ).join(' ');
+    }
+
+    function showRandomEntry() {
+      if (allData.length === 0) return;
+      const index = Math.floor(Math.random() * allData.length);
+      const randomData = allData[index];
+      document.getElementById('randomEntry').innerHTML = formatEntry(randomData);
     }
 
     document.getElementById('searchBox').addEventListener('input', function() {
