@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Translation Style Library</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -64,6 +65,24 @@
     .tag-func { background: #d0eaff; color: #1565c0; }
     .tag-tone { background: #ffd6d6; color: #c62828; }
     .tag-scene { background: #e8d4ff; color: #6a1b9a; }
+    .speak-button {
+      background-color: #4caf50;
+      color: white;
+      font-size: 13px;
+      padding: 4px 8px;
+      border: none;
+      border-radius: 4px;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+    .chart-section {
+      max-width: 700px;
+      margin: 40px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
   </style>
 </head>
 <body>
@@ -81,6 +100,13 @@
 
   <div id="content">Loading...</div>
 
+  <div class="chart-section">
+    <h2 style="text-align:center;">标签使用统计</h2>
+    <canvas id="funcChart" height="200"></canvas>
+    <canvas id="toneChart" height="200"></canvas>
+    <canvas id="sceneChart" height="200"></canvas>
+  </div>
+
   <script>
     let allData = [];
 
@@ -90,6 +116,7 @@
         allData = data;
         render(data);
         showRandomEntry();
+        drawCharts(data);
       });
 
     function render(data) {
@@ -107,6 +134,7 @@
       return `
         <div><span class="label">中文：</span>${entry["中文"]}</div>
         <div><span class="label">英文：</span>${entry["英文表达"]}</div>
+        <button class="speak-button" onclick="speak('${entry["英文表达"].replace(/'/g, "\\'")}')">▶️ 朗读英文</button>
         <div><span class="label">版本：</span>${entry["版本"]}</div>
         <div><span class="label">主功能：</span>${wrapTags(entry["主功能"], 'tag-func')}</div>
         <div><span class="label">语气风格：</span>${wrapTags(entry["语气风格"], 'tag-tone')}</div>
@@ -130,6 +158,13 @@
       document.getElementById('randomEntry').innerHTML = formatEntry(randomData);
     }
 
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
     document.getElementById('searchBox').addEventListener('input', function() {
       const keyword = this.value.toLowerCase();
       const filtered = allData.filter(entry =>
@@ -139,6 +174,56 @@
       );
       render(filtered);
     });
+
+    function drawCharts(data) {
+      const funcStats = countTags(data, "主功能");
+      const toneStats = countTags(data, "语气风格");
+      const sceneStats = countTags(data, "使用场景");
+
+      drawChart("funcChart", "主功能使用频率", funcStats);
+      drawChart("toneChart", "语气风格使用频率", toneStats);
+      drawChart("sceneChart", "使用场景使用频率", sceneStats);
+    }
+
+    function countTags(data, field) {
+      const counter = {};
+      data.forEach(entry => {
+        if (entry[field]) {
+          entry[field].split(',').forEach(tag => {
+            const t = tag.trim();
+            if (t) counter[t] = (counter[t] || 0) + 1;
+          });
+        }
+      });
+      return counter;
+    }
+
+    function drawChart(canvasId, title, stats) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(stats),
+          datasets: [{
+            label: title,
+            data: Object.values(stats),
+            backgroundColor: '#42a5f5'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision:0 }
+            }
+          }
+        }
+      });
+    }
   </script>
 </body>
 </html>
