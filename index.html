@@ -14,7 +14,19 @@
     h1 {
       text-align: center;
       color: #222;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
+    }
+    #search-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      max-width: 500px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     .entry {
       background: white;
@@ -46,30 +58,40 @@
 </head>
 <body>
   <h1>Translation Expression Showcase</h1>
+  <div id="search-container">
+    <input type="text" id="searchBox" placeholder="输入关键词以搜索表达、标签或角色..." />
+  </div>
   <div id="content">Loading...</div>
 
   <script>
+    let allData = [];
+
     fetch('csvjson.json')
       .then(res => res.json())
       .then(data => {
-        const container = document.getElementById('content');
-        container.innerHTML = '';
-        data.forEach(entry => {
-          const div = document.createElement('div');
-          div.className = 'entry';
-          div.innerHTML = `
-            <div><span class="label">中文：</span>${entry["中文"]}</div>
-            <div><span class="label">英文：</span>${entry["英文表达"]}</div>
-            <div><span class="label">版本：</span>${entry["版本"]}</div>
-            <div><span class="label">主功能：</span>${wrapTags(entry["主功能"], 'tag-func')}</div>
-            <div><span class="label">语气风格：</span>${wrapTags(entry["语气风格"], 'tag-tone')}</div>
-            <div><span class="label">使用场景：</span>${wrapTags(entry["使用场景"], 'tag-scene')}</div>
-            <div><span class="label">适用角色：</span>${entry["适用角色"]}</div>
-            <div><span class="label">备注：</span>${entry["备注"]}</div>
-          `;
-          container.appendChild(div);
-        });
+        allData = data;
+        render(data);
       });
+
+    function render(data) {
+      const container = document.getElementById('content');
+      container.innerHTML = '';
+      data.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'entry';
+        div.innerHTML = `
+          <div><span class="label">中文：</span>${entry["中文"]}</div>
+          <div><span class="label">英文：</span>${entry["英文表达"]}</div>
+          <div><span class="label">版本：</span>${entry["版本"]}</div>
+          <div><span class="label">主功能：</span>${wrapTags(entry["主功能"], 'tag-func')}</div>
+          <div><span class="label">语气风格：</span>${wrapTags(entry["语气风格"], 'tag-tone')}</div>
+          <div><span class="label">使用场景：</span>${wrapTags(entry["使用场景"], 'tag-scene')}</div>
+          <div><span class="label">适用角色：</span>${entry["适用角色"]}</div>
+          <div><span class="label">备注：</span>${entry["备注"]}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
 
     function wrapTags(text, className) {
       if (!text) return '';
@@ -77,6 +99,16 @@
         `<span class="tag ${className}">${tag.trim()}</span>`
       ).join(' ');
     }
+
+    document.getElementById('searchBox').addEventListener('input', function() {
+      const keyword = this.value.toLowerCase();
+      const filtered = allData.filter(entry =>
+        Object.values(entry).some(val =>
+          val && val.toLowerCase().includes(keyword)
+        )
+      );
+      render(filtered);
+    });
   </script>
 </body>
 </html>
