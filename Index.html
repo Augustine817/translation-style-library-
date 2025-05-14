@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>我的翻译语料库</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+    .entry { border-bottom: 1px solid #ddd; padding: 10px 0; }
+    .label { font-weight: bold; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Translation Expression Showcase</h1>
+  <div id="content">Loading...</div>
+
+  <script>
+    fetch('csvjson.json')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('content');
+        container.innerHTML = '';
+        data.forEach(entry => {
+          const div = document.createElement('div');
+          div.className = 'entry';
+          div.innerHTML = `
+            <div><span class="label">中文：</span>${entry["中文"]}</div>
+            <div><span class="label">英文：</span>${entry["英文表达"]}</div>
+            <div><span class="label">版本：</span>${entry["版本"]}</div>
+            <div><span class="label">主功能：</span>${entry["主功能"]}</div>
+            <div><span class="label">语气风格：</span>${entry["语气风格"]}</div>
+            <div><span class="label">使用场景：</span>${entry["使用场景"]}</div>
+            <div><span class="label">适用角色：</span>${entry["适用角色"]}</div>
+            <div><span class="label">备注：</span>${entry["备注"]}</div>
+          `;
+          container.appendChild(div);
+        });
+      });
+  </script>
+</body>
+</html>
